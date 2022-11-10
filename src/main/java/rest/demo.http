@@ -1,6 +1,19 @@
 GET http://localhost:8080/devops_starter_war_exploded/api/info
 
 ###
+POST http://onebrightcreation.com:8081/CA-2/api/jokes
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "test123"
+}
+
+###
+GET http://onebrightcreation.com:8081/CA-2/api/jokes
+
+
+###
 POST http://localhost:8080/CA_2_war_exploded/api/login
 Content-Type: application/json
 
