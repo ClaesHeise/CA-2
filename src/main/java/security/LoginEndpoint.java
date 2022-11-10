@@ -119,4 +119,5 @@ public class LoginEndpoint {
         }
         return Response.ok().entity(userDTO).build();
     }
+
 }

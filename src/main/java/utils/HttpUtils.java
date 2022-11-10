@@ -17,9 +17,9 @@ public class HttpUtils {
         con.setRequestProperty("User-Agent", "server");
 
         Scanner scan = new Scanner(con.getInputStream());
-        String jsonStr = null;
-        if (scan.hasNext()) {
-            jsonStr = scan.nextLine();
+        String jsonStr = "";
+        while (scan.hasNext()) {
+            jsonStr += scan.nextLine();
         }
         scan.close();
         return jsonStr;

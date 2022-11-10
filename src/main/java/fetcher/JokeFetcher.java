@@ -29,14 +29,20 @@ public class JokeFetcher {
         List<String> urls = new ArrayList<>();
         urls.add("https://icanhazdadjoke.com");
         urls.add("https://api.chucknorris.io/jokes/random");
+        urls.add("https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single");
+        urls.add("https://v2.jokeapi.dev/joke/Dark?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single");
 
         List<String> name = new ArrayList<>();
-        name.add("DadJoke");
-        name.add("ChuckJoke");
+        name.add("Dad");
+        name.add("Chuck Norris");
+        name.add("Programming");
+        name.add("Dark");
 
         List<String> nameOfValue = new ArrayList<>();
         nameOfValue.add("joke");
         nameOfValue.add("value");
+        nameOfValue.add("joke");
+        nameOfValue.add("joke");
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
         List<Future<JokeDTO>> futures = new ArrayList<>();

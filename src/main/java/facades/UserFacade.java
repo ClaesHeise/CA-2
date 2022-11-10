@@ -96,11 +96,12 @@ public class UserFacade {
         return new UserDTO(user);
     }
 
-    public List<UserDTO> readUserHighscores(int max) {
+    public List<UserDTO> readUserHighscores(int max, int start) {
         EntityManager em = emf.createEntityManager();
 //        TypedQuery<User> query = em.createQuery("SELECT u.user_name, u.high_score FROM users u ORDER BY u.high_score DESC", User.class);
         TypedQuery<User> query = em.createQuery("SELECT u FROM User u ORDER BY u.highscore DESC", User.class);
         query.setMaxResults(max);
+        query.setFirstResult(start);
         List<User> users = query.getResultList();
         List<UserDTO> userDTOs = new ArrayList<>();
         for (User user : users) {

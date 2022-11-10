@@ -42,48 +42,6 @@ public class DemoResource {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getInfoForAll() {
-        return "{\"msg\":\"Hello anonymous\"}";
-    }
-
-    //Just to verify if the database is setup
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("all")
-    public String allUsers() {
-
-        EntityManager em = EMF.createEntityManager();
-        try {
-            TypedQuery<User> query = em.createQuery ("select u from User u",entities.User.class);
-            List<User> users = query.getResultList();
-            return "[" + users.size() + "]";
-        } finally {
-            em.close();
-        }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("user")
-    @RolesAllowed("user")
-    public String getFromUser() {
-        String thisuser = securityContext.getUserPrincipal().getName();
-        return "{\"msg\": \"You're logged in as: " + thisuser + "\"}";
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("admin")
-    @RolesAllowed("admin")
-    public String getFromAdmin() {
-        String thisuser = securityContext.getUserPrincipal().getName();
-        return "{\"msg\": \"Hello to (admin) User: " + thisuser + "\"}";
-    }
-
-
-
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -110,15 +68,8 @@ public class DemoResource {
     @Path("highscores")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response highscores(String jsonString) {
-        int max;
-        try {
-            JsonObject json = JsonParser.parseString(jsonString).getAsJsonObject();
-            max = json.get("max").getAsInt();
-        } catch (IllegalStateException e) {
-            max = 100;
-        }
-        //if (max ) max = 100;
-        return Response.ok().entity(GSON.toJson(USER_FACADE.readUserHighscores(max))).build();
+    public Response highscores(@QueryParam("max") int max, @QueryParam("start") int start) {
+        if (max <= 0) max = 100;
+        return Response.ok().entity(GSON.toJson(USER_FACADE.readUserHighscores(max, start))).build();
     }
 }

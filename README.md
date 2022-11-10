@@ -10,7 +10,16 @@ As a side note: Being presented with 2-4 jokes at a time, one could say, that th
 
 Here is a few REST endpoints, that is to be used for the program, for the curious:
 
-1) http://onebrightcreation.com:8081/CA-2/api/jokes (get a few jokes, in a single api call)
-2) http://onebrightcreation.com:8081/CA-2/api/info/highscores (gets the top X players, with the highest scores, for the leaderboards)
-3) http://onebrightcreation.com:8081/CA-2/api/info (with a PUT request, to update the current user score. A boolean 'isCorrect' is send with it, if it's 'true' the score should increment, if it's 'false' the user has answered incorrect, and the score should reset (to 0))
-ttp://onebrightcreation.com:8081/CA-2/api/user/create (makes a user, using a POST request, a 'username' and a 'password', quite simple)
+| Type | Endpoint            | Returns      | Body                                   | Header                 |
+|------|---------------------|--------------|----------------------------------------|------------------------|
+| GET  | api/jokes           | Joke[]       |                                        |                        |
+| GET  | api/info/highscores | User[]       |                                        |                        |
+| PUT  | api/info            | User         | isCorrect: Boolean                     | x-access-token: String |
+| POST | api/user/create     | User         | Username: String,<br/>Password: String |                        |
+| POST | api/user/login      | User + token | Username: String,<br/>Password: String |                        |
+
+Joke = {name: String, joke: String}
+<br/>
+User = {username: String, score: long, highscore: long}
+<br/>
+token = JWT

@@ -1,37 +1,34 @@
 package rest;
 
-import entities.User;
 import entities.Role;
-
+import entities.User;
+import org.junit.jupiter.api.*;
+import utils.EMF_Creator;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
-import io.restassured.http.ContentType;
+import static org.hamcrest.Matchers.*;
+
 import io.restassured.parsing.Parser;
 import java.net.URI;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import static org.hamcrest.Matchers.equalTo;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import utils.EMF_Creator;
 
-public class LoginEndpointTest {
+//Uncomment the line below, to temporarily disable this test
+
+public class UserResourceTest {
 
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
-
+    private static User u1, u2;
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
     private static HttpServer httpServer;
     private static EntityManagerFactory emf;
-    private static User u1, u2;
-    
+
     static HttpServer startServer() {
         ResourceConfig rc = ResourceConfig.forApplication(new ApplicationConfig());
         return GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);
@@ -52,9 +49,10 @@ public class LoginEndpointTest {
 
     @AfterAll
     public static void closeTestServer() {
+        //System.in.read();
+
         //Don't forget this, if you called its counterpart in @BeforeAll
         EMF_Creator.endREST_TestWithDB();
-        
         httpServer.shutdownNow();
     }
 
@@ -85,74 +83,66 @@ public class LoginEndpointTest {
         }
     }
 
-    //This is how we hold on to the token after login, similar to that a client must store the token somewhere
-    private static String securityToken;
-
-    //Utility method to login and set the returned securityToken
-    private static void login(String username, String password) {
-        String json = String.format("{username: \"%s\", password: \"%s\"}", username, password);
-        securityToken = given()
-                .contentType("application/json")
-                .body(json)
-                //.when().post("/api/login")
-                .when().post("/user/login")
-                .then()
-                .extract().path("token");
-        //System.out.println("TOKEN ---> " + securityToken);
-    }
-
-    private void logOut() {
-        securityToken = null;
-    }
-
     @Test
-    public void serverIsRunning() {
+    public void testServerIsUp() {
         given().when().get("/jokes").then().statusCode(200);
     }
 
     @Test
-    public void testUsernameReturnedOnLogin() {
-        String json = String.format("{username: \"%s\", password: \"%s\"}", u1.getUserName(), "password1");
+    public void testGetFourJokes() {
         given()
                 .contentType("application/json")
-                .body(json)
-                .when().post("/user/login")
+                .get("/jokes")
                 .then()
-                .statusCode(200)
-                .body("username", equalTo(u1.getUserName()));
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("", hasSize(4));
     }
 
     @Test
-    public void testCreateUser() {
-        String json = String.format("{username: \"%s\", password: \"%s\"}", "user3", "password3");
+    public void testHasDad() {
         given()
                 .contentType("application/json")
-                .body(json)
-                .when().post("/user/create")
+                .get("/jokes")
                 .then()
-                .statusCode(200)
-                .body("username", equalTo("user3"));
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("[0].name", equalTo("Dad"));
     }
 
     @Test
-    public void testUserUpdateScore() {
-        login("user1", "password1");
+    public void testHasHighscore() {
         given()
                 .contentType("application/json")
-                .header("x-access-token", securityToken)
-                .body("{\"isCorrect\": true}")
-                .when().put("/info")
+                .get("/info/highscores")
                 .then()
-                .statusCode(200)
-                .body("score", equalTo(6));
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("[0].score", equalTo(5))
+                .body("", hasSize(2));
     }
 
     @Test
-    public void testUserUpdateScoreWithoutLogin() {
+    public void testHasMaxHighscore() {
         given()
                 .contentType("application/json")
-                .when().put("/info")
+                .get("/info/highscores?max=1")
                 .then()
-                .statusCode(403);
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("[0].score", equalTo(5))
+                .body("", hasSize(1));
+    }
+
+    @Test
+    public void testHasStartHighscore() {
+        given()
+                .contentType("application/json")
+                .get("/info/highscores?start=1")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("[0].score", equalTo(0))
+                .body("", hasSize(1));
     }
 }
